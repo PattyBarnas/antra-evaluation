@@ -1,7 +1,14 @@
 const API = (() => {
   const URL = "http://localhost:3000";
-  const getCart = () => {
+  const getCart = async () => {
     // define your method to get cart data
+    const response = await fetch(URL + "/cart");
+
+    if (!response.ok) {
+      throw new Error("Could not get inventory Data");
+    }
+    const inventory = await response.json();
+    return inventory;
   };
 
   const getInventory = async () => {
@@ -12,7 +19,8 @@ const API = (() => {
       throw new Error("Could not get inventory Data");
     }
     const inventory = await response.json();
-    return await inventory;
+    console.log(inventory, "inventory");
+    return inventory;
   };
 
   const addToCart = async (inventoryItem) => {
@@ -96,11 +104,11 @@ const Model = (() => {
 
     set cart(newCart) {
       this.#cart = newCart;
-      // this.#onChange;
+      this.#onChange();
     }
     set inventory(newInventory) {
       this.#inventory = newInventory;
-      this.#onChange;
+      this.#onChange();
     }
 
     subscribe(cb) {
@@ -126,21 +134,19 @@ const Model = (() => {
   };
 })();
 
-console.log(Model.getCart);
-
 const View = (() => {
   // implement your logic for View
 
   const inventoryListEl = document.querySelector(".inventory-container ul");
-  const inventoryListContainer = document.querySelector(".inventory-container");
+
   const checkoutBtnEl = document.querySelector(".checkout-btn");
 
   const renderInventory = (items) => {
     let itemTemp = "";
     items.forEach((item) => {
       const content = item.content;
-      // const liTemp = `<li class="li-content">${content}</li><button class="addBtn">+</button>${counter} <button class="removeBtn" >-</button><button class="addToCart-btn" >add to cart</button>`;
-      let liTemp = `<li>${content}</li>`;
+      console.log(content, "c");
+      const liTemp = `<li inventory-id=${item.id}>${content}</li><button class="addBtn">+</button>${counter} <button class="removeBtn" >-</button><button class="addToCart-btn" >add to cart</button>`;
       itemTemp += liTemp;
     });
     inventoryListEl.innerHTML = itemTemp;
@@ -150,9 +156,10 @@ const View = (() => {
     inventoryListEl,
     renderInventory,
     checkoutBtnEl,
-    inventoryListContainer,
   };
 })();
+
+console.log(Model.getInventory);
 
 const Controller = ((model, view) => {
   // implement your logic for Controller
@@ -160,7 +167,15 @@ const Controller = ((model, view) => {
 
   const init = () => {
     model.getInventory().then((data) => {
-      state.inventory = data;
+      const items = data.map((item) => ({ ...item, count: 0 }));
+      state.inventory = items;
+      view.renderInventory(state.inventory);
+    });
+    console.log("hi");
+    model.getCart().then((data) => {
+      const cartItems = data.map((item) => {
+        state.cart = item;
+      });
     });
   };
   const handleUpdateAmount = () => {};
@@ -186,16 +201,31 @@ const Controller = ((model, view) => {
   };
 
   const handleCheckout = () => {
-    view.checkoutBtnEl.addEventListener("click", () => {});
+    view.checkoutBtnEl.addEventListener("click", () => {
+      model.checkout().then(() => {
+        state.cart = [];
+      });
+    });
   };
 
   const bootstrap = () => {
+    console.log("1");
     handleUpdateAmount();
+    console.log("2");
     handleAddToCart();
-    handleDelete();
-    handleCheckout();
+    console.log("3");
     init();
-    state.subscribe(() => view.renderInventory(state.inventory));
+
+    console.log("0");
+    handleDelete();
+    // console.log("4");
+    handleCheckout();
+    // console.log("5");
+
+    state.subscribe(
+      () => view.renderInventory(state.inventory),
+      view.renderCart(state.cart)
+    );
   };
   return {
     bootstrap,
