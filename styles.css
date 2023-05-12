@@ -1,0 +1,17 @@
+.app {
+  width: 100rem;
+  display: flex;
+  /* flex-direction: column; */
+  gap: 12rem;
+  justify-content: center;
+}
+
+.checkout-btn {
+  padding: 1rem 5rem;
+  color: white;
+  background-color: black;
+  border-radius: 4px;
+}
+.li-content {
+  /* background-color: ; */
+}
