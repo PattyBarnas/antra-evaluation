@@ -104,11 +104,11 @@ const Model = (() => {
 
     set cart(newCart) {
       this.#cart = newCart;
-      this.#onChange();
+      this.#onChange;
     }
     set inventory(newInventory) {
       this.#inventory = newInventory;
-      this.#onChange();
+      this.#onChange;
     }
 
     subscribe(cb) {
@@ -142,6 +142,7 @@ const View = (() => {
   const checkoutBtnEl = document.querySelector(".checkout-btn");
 
   const renderInventory = (items) => {
+    let counter = 0;
     let itemTemp = "";
     items.forEach((item) => {
       const content = item.content;
@@ -171,7 +172,7 @@ const Controller = ((model, view) => {
       state.inventory = items;
       view.renderInventory(state.inventory);
     });
-    console.log("hi");
+
     model.getCart().then((data) => {
       const cartItems = data.map((item) => {
         state.cart = item;
