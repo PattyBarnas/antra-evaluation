@@ -143,11 +143,12 @@ const View = (() => {
   const inventoryListEl = document.querySelector(".inventory-container ul");
 
   const renderInventory = (items) => {
+    const state = new Model.State();
     let itemTemp = "";
     items.forEach((item) => {
       const content = item.content;
 
-      const liTemp = `<div class='item-container'><li class='list-item' inventory-id=${item.id}>${content}</li><button class="addBtn">+</button><span>${Model.State.quantity} </span><button class="removeBtn">-</button><button class="addToCart-btn">add to cart</button></div>`;
+      const liTemp = `<div class='item-container'><li class='list-item' inventory-id=${item.id}>${content}</li><button class="addBtn">+</button><span>${state.quantity} </span><button class="removeBtn">-</button><button class="addToCart-btn">add to cart</button></div>`;
       itemTemp += liTemp;
     });
     inventoryListEl.innerHTML = itemTemp;
@@ -180,7 +181,7 @@ const Controller = ((model, view) => {
     view.inventoryListEl.addEventListener("click", function (e) {
       if (e.target.className === "addBtn") {
         state.quantity++;
-        console.log(typeof state.quantity);
+        console.log(state.quantity);
       } else if (e.target.className === "removeBtn") {
       } else {
         return;
@@ -188,17 +189,18 @@ const Controller = ((model, view) => {
     });
   };
 
-  const handleAddToCart = (item) => {
+  const handleAddToCart = () => {
     view.inventoryListEl.addEventListener("click", function (e) {
       e.preventDefault();
       let item = state.inventory.find((item) => item.id === item.id);
+      console.log(item, "item");
 
       console.log("clicked", e.target);
       if (e.target.className !== "addToCart-btn") return;
 
       const id = e.target.parentNode.getAttribute("inventory-id");
-
-      model.addToCart(id).then((data) => {
+      console.log("handleCart id", id);
+      model.addToCart(item).then((data) => {
         state.cart = [data, ...state.inventory];
       });
     });
