@@ -12,9 +12,7 @@
   background-color: black;
   border-radius: 4px;
 }
-.li-content {
-  /* background-color: ; */
-}
+
 .list-item {
   font-size: 2rem;
   display: flex;
@@ -52,7 +50,8 @@
   gap: 0.8rem;
   padding: 0.7rem;
 }
-.item-container {
+.item-container,
+.cart-wrapper ul {
   background-color: #fff3bf;
   padding: 0.7rem 5rem;
   margin-bottom: 1.2rem;
@@ -62,4 +61,24 @@
 h1 {
   text-align: center;
   font-size: 3rem;
+}
+/* CART */
+.cart-wrapper ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  width: 100%;
+}
+.cart-wrapper ul li {
+  list-style: none;
+  font-size: 1.4rem;
+}
+.delete-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: rgba(18, 146, 237, 0.835);
+  color: #fff;
+  cursor: pointer;
 }
