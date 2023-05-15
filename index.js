@@ -141,6 +141,7 @@ const View = (() => {
   // implement your logic for View
 
   const inventoryListEl = document.querySelector(".inventory-container ul");
+  const cartListEl = document.querySelector(".cart-wrapper ul");
 
   const renderInventory = (items) => {
     const state = new Model.State();
@@ -154,9 +155,22 @@ const View = (() => {
     inventoryListEl.innerHTML = itemTemp;
   };
 
+  const renderCart = (items) => {
+    let cartTemp = "";
+    items.map((item) => {
+      console.log(item, "item renderCart");
+      const content = item.content;
+      const count = item.count;
+      const liTemp = `<li>${content} x ${count}</li>`;
+      cartTemp += liTemp;
+    });
+    cartListEl.innerHTML = cartTemp;
+  };
+
   return {
     inventoryListEl,
     renderInventory,
+    renderCart,
   };
 })();
 
@@ -172,9 +186,9 @@ const Controller = ((model, view) => {
     });
 
     model.getCart().then((data) => {
-      const cartItems = data.map((item) => {
-        state.cart = item;
-      });
+      const cartItems = data.map((item) => ({ ...item, count: 0 }));
+      state.cart = cartItems;
+      view.renderCart(state.cart);
     });
   };
   const handleUpdateAmount = () => {
@@ -192,7 +206,7 @@ const Controller = ((model, view) => {
   const handleAddToCart = () => {
     view.inventoryListEl.addEventListener("click", function (e) {
       e.preventDefault();
-      let item = state.inventory.find((item) => item.id === item.id);
+      let item = state.inventory.find((item) => item.id);
       console.log(item, "item");
 
       console.log("clicked", e.target);
