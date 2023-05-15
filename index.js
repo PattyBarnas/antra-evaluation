@@ -19,7 +19,6 @@ const API = (() => {
       throw new Error("Could not get inventory Data");
     }
     const inventory = await response.json();
-    console.log(inventory, "inventory");
     return inventory;
   };
 
@@ -82,17 +81,18 @@ const API = (() => {
   };
 })();
 
-console.log(API.getInventory().then((item) => console.log(item)));
-
 const Model = (() => {
   // implement your logic for Model
   class State {
     #onChange;
     #inventory;
     #cart;
+    #quantity = 0;
+
     constructor() {
       this.#inventory = [];
       this.#cart = [];
+      this.#quantity = 0;
     }
     get cart() {
       return this.#cart;
@@ -100,6 +100,9 @@ const Model = (() => {
 
     get inventory() {
       return this.#inventory;
+    }
+    get quantity() {
+      return this.#quantity;
     }
 
     set cart(newCart) {
@@ -139,15 +142,12 @@ const View = (() => {
 
   const inventoryListEl = document.querySelector(".inventory-container ul");
 
-  const checkoutBtnEl = document.querySelector(".checkout-btn");
-
   const renderInventory = (items) => {
-    let counter = 0;
     let itemTemp = "";
     items.forEach((item) => {
       const content = item.content;
-      console.log(content, "c");
-      const liTemp = `<li inventory-id=${item.id}>${content}</li><button class="addBtn">+</button>${counter} <button class="removeBtn" >-</button><button class="addToCart-btn" >add to cart</button>`;
+
+      const liTemp = `<div class='item-container'><li class='list-item' inventory-id=${item.id}>${content}</li><button class="addBtn">+</button><span>${Model.State.quantity} </span><button class="removeBtn">-</button><button class="addToCart-btn">add to cart</button></div>`;
       itemTemp += liTemp;
     });
     inventoryListEl.innerHTML = itemTemp;
@@ -156,11 +156,8 @@ const View = (() => {
   return {
     inventoryListEl,
     renderInventory,
-    checkoutBtnEl,
   };
 })();
-
-console.log(Model.getInventory);
 
 const Controller = ((model, view) => {
   // implement your logic for Controller
@@ -179,26 +176,38 @@ const Controller = ((model, view) => {
       });
     });
   };
-  const handleUpdateAmount = () => {};
+  const handleUpdateAmount = () => {
+    view.inventoryListEl.addEventListener("click", function (e) {
+      if (e.target.className === "addBtn") {
+        state.quantity++;
+        console.log(typeof state.quantity);
+      } else if (e.target.className === "removeBtn") {
+      } else {
+        return;
+      }
+    });
+  };
 
   const handleAddToCart = (item) => {
-    const exisitingCartItemIndex = state.inventory.findIndex(
-      (i) => i.id === item.id
-    );
-    const exisitingItem = state.inventory[exisitingCartItemIndex];
-    // if(item){
-    //   const updatedItems = {
-    //     ...exisitingItem,
-    //     amount:
-    //     // COMEBACK
-    //   }
-    // }
+    view.inventoryListEl.addEventListener("click", function (e) {
+      e.preventDefault();
+      let item = state.inventory.find((item) => item.id === item.id);
+
+      console.log("clicked", e.target);
+      if (e.target.className !== "addToCart-btn") return;
+
+      const id = e.target.parentNode.getAttribute("inventory-id");
+
+      model.addToCart(id).then((data) => {
+        state.cart = [data, ...state.inventory];
+      });
+    });
   };
 
   const handleDelete = (id) => {
-    view.removeBtn.addEventListener("click", () => {
-      state.cart.filter((item) => item.id === id);
-    });
+    // view.removeBtn.addEventListener("click", () => {
+    //   state.cart.filter((item) => item.id === id);
+    // });
   };
 
   const handleCheckout = () => {
@@ -210,18 +219,15 @@ const Controller = ((model, view) => {
   };
 
   const bootstrap = () => {
-    console.log("1");
     handleUpdateAmount();
-    console.log("2");
+
     handleAddToCart();
-    console.log("3");
+
     init();
 
-    console.log("0");
     handleDelete();
-    // console.log("4");
+
     handleCheckout();
-    // console.log("5");
 
     state.subscribe(
       () => view.renderInventory(state.inventory),
